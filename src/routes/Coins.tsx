@@ -14,6 +14,7 @@ const Title = styled.h1`
     display: flex;
     justify-content: center;
     align-items: center;
+    font-weight: 700;
 `;
 
 const CoinsList = styled.ul`
@@ -81,7 +82,7 @@ function Coins() {
                 {loading ? <Loader>Loading...</Loader> : (
                     coins.map((coin) => (
                         <Coin key={coin.id}>
-                            <Link to={`/${coin.name}`} state={{ name: coin.name }}>
+                            <Link to={`/${coin.id}`} state={{ name: coin.name }}>
                                 <CoinIcon src={`https://coinicons-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`} />
                                 {coin.name} &rarr;
                             </Link>
