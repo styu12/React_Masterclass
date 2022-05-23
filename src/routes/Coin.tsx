@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useEffect } from "react";
-import { Route, Routes, useLocation, useParams } from "react-router-dom";
+import { useQuery } from "react-query";
+import { Link, Route, Routes, useLocation, useMatch, useParams } from "react-router-dom";
 import styled from "styled-components";
+import { fetchCoinInfo, fetchTickerInfo } from "../api";
 import Chart from "./Chart";
 import Price from "./Price";
 
@@ -119,56 +121,85 @@ const Description = styled.p`
     color: white;
 `;
 
+const Tabs = styled.div`
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+const Tab = styled.div<{isActive: boolean}>`
+    width: 45%;
+    height: 50px;
+    background-color: #2d3436;
+    border-radius: 15px;
+    color: ${props => props.isActive ? props.theme.accentColor : props.theme.textColor};
+    a {
+        display: block;
+        text-align:center;
+        font-size: 17px;
+        padding-top: 15px;
+        width: 100%;
+        height: 100%;
+    }
+`;
+
 function Coin() {
     const location = useLocation();
     const {coinId} = useParams();
     const {name} = location.state ? location.state as RouterState : {name: null};
-    const [loading, setLoading] = useState(true);
-    const [coinInfo, setCoinInfo] = useState<ICoinInfo>();
-    const [priceInfo, setPriceInfo] = useState<IPriceInfo>();
-
-
-    useEffect(() => {
-        ( async() => {
-            const coinApi = await (await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)).json();
-            const priceApi = await (await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)).json();
-            setCoinInfo(coinApi);
-            setPriceInfo(priceApi);
-            setLoading(false);
-        } )();
-    }, [coinId]);
+    const {isLoading: infoLoading, data: infoData} = useQuery<ICoinInfo>(
+        ["info", coinId], 
+        () => fetchCoinInfo(coinId)
+    );
+    const {isLoading: priceLoading, data: priceData} = useQuery<IPriceInfo>(
+        ["tickers", coinId],
+        () => fetchTickerInfo(coinId)
+    );
+    const loading = infoLoading || priceLoading;
+    const chartMatch = useMatch('/:coinId/chart');
+    const priceMatch = useMatch('/:coinId/price');
     return (
         <Container>
-            <Title>{name ? name?.toUpperCase() : loading ? <Loader>Loading...</Loader> : coinInfo?.name}</Title>
+            <Title>{name ? name?.toUpperCase() : loading ? <Loader>Loading...</Loader> : infoData?.name}</Title>
             {loading ? <Loader>Loading...</Loader> : (
                 <>
                 <Overview>
                     <OverviewItem>
                         <span>RANK</span>
-                        <span>{priceInfo?.rank}</span>
+                        <span>{priceData?.rank}</span>
                     </OverviewItem>
                     <OverviewItem>
                         <span>SYMBOL</span>
-                        <span>${priceInfo?.symbol}</span>
+                        <span>${priceData?.symbol}</span>
                     </OverviewItem>
                     <OverviewItem>
                         <span>OPEN SOURCE</span>
-                        <span>{coinInfo?.open_source ? "Yes" : "No"}</span>
+                        <span>{infoData?.open_source ? "Yes" : "No"}</span>
                     </OverviewItem>
                 </Overview>
 
-                <Description>{coinInfo?.description}</Description>
+                <Description>{infoData?.description}</Description>
 
                 <Overview>
                     <OverviewItem>
                         <span>TOTAL SUPPLY</span>
-                        <span>{priceInfo?.total_supply}</span>
+                        <span>{priceData?.total_supply}</span>
                     </OverviewItem>
                     <OverviewItem>
                         <span>MAX SUPPLY</span>
-                        <span>{priceInfo?.max_supply}</span>
+                        <span>{priceData?.max_supply}</span>
                     </OverviewItem>
                 </Overview>
+                
+                <Tabs>
+                    <Tab isActive={chartMatch !== null}>
+                        <Link to="chart">Chart</Link>
+                    </Tab>
+                    <Tab isActive={priceMatch !== null}>
+                        <Link to="price">Price</Link>
+                    </Tab>
+                </Tabs>
 
                 <Routes>
                     <Route path="chart" element={<Chart />} />
