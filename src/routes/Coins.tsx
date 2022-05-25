@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
 import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
@@ -67,9 +68,14 @@ interface CoinInterface {
 }
 
 function Coins() {
-    const {isLoading, data} = useQuery<CoinInterface[]>("allCoins", fetchCoins);
+    const {isLoading, data} = useQuery<CoinInterface[]>("allCoins", fetchCoins, {
+        refetchInterval: 10000,
+    });
     return (
         <Container>
+            <Helmet>
+                <title>HCoins</title>
+            </Helmet>
             <Title>COIN TRACKER</Title>
             <CoinsList>
                 {isLoading ? <Loader>Loading...</Loader> : (

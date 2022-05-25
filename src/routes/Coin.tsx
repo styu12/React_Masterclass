@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useEffect } from "react";
+import {Helmet} from "react-helmet";
 import { useQuery } from "react-query";
 import { Link, Route, Routes, useLocation, useMatch, useParams } from "react-router-dom";
 import styled from "styled-components";
@@ -154,13 +155,19 @@ function Coin() {
     );
     const {isLoading: priceLoading, data: priceData} = useQuery<IPriceInfo>(
         ["tickers", coinId],
-        () => fetchTickerInfo(coinId)
+        () => fetchTickerInfo(coinId),
+        {
+            refetchInterval: 5000,
+        }
     );
     const loading = infoLoading || priceLoading;
     const chartMatch = useMatch('/:coinId/chart');
     const priceMatch = useMatch('/:coinId/price');
     return (
         <Container>
+            <Helmet>
+                <title>HCoins | {name ? name?.toUpperCase() : loading ? <Loader>Loading...</Loader> : infoData?.name}</title>
+            </Helmet>
             <Title>{name ? name?.toUpperCase() : loading ? <Loader>Loading...</Loader> : infoData?.name}</Title>
             {loading ? <Loader>Loading...</Loader> : (
                 <>
@@ -174,8 +181,8 @@ function Coin() {
                         <span>${priceData?.symbol}</span>
                     </OverviewItem>
                     <OverviewItem>
-                        <span>OPEN SOURCE</span>
-                        <span>{infoData?.open_source ? "Yes" : "No"}</span>
+                        <span>PRICE</span>
+                        <span>${priceData?.quotes.USD.price.toFixed(2)}</span>
                     </OverviewItem>
                 </Overview>
 
@@ -202,7 +209,7 @@ function Coin() {
                 </Tabs>
 
                 <Routes>
-                    <Route path="chart" element={<Chart />} />
+                    <Route path="chart" element={<Chart coinId={coinId} />} />
                     <Route path="price" element={<Price />} />
                 </Routes>
                 </>
