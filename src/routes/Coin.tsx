@@ -72,6 +72,17 @@ const Container = styled.div`
     margin: 30px auto;
 `;
 
+const BackBtn = styled.button`
+    font-size: 16px;
+    background-color: transparent;
+    color: ${props => props.theme.textColor};
+    border: none;
+    cursor: pointer;
+    &:hover {
+        color: ${props => props.theme.accentColor};
+    }
+`;
+
 const Title = styled.h1`
     font-size: 45px;
     color: ${props => props.theme.accentColor};
@@ -145,7 +156,11 @@ const Tab = styled.div<{isActive: boolean}>`
     }
 `;
 
-function Coin() {
+interface ICoinProps {
+    isDark: boolean;
+}
+
+function Coin({isDark}:ICoinProps) {
     const location = useLocation();
     const {coinId} = useParams();
     const {name} = location.state ? location.state as RouterState : {name: null};
@@ -168,6 +183,9 @@ function Coin() {
             <Helmet>
                 <title>HCoins | {name ? name?.toUpperCase() : loading ? <Loader>Loading...</Loader> : infoData?.name}</title>
             </Helmet>
+            <Link to='/'>
+                <BackBtn>BACK &larr;</BackBtn>
+            </Link>
             <Title>{name ? name?.toUpperCase() : loading ? <Loader>Loading...</Loader> : infoData?.name}</Title>
             {loading ? <Loader>Loading...</Loader> : (
                 <>
@@ -209,7 +227,7 @@ function Coin() {
                 </Tabs>
 
                 <Routes>
-                    <Route path="chart" element={<Chart coinId={coinId} />} />
+                    <Route path="chart" element={<Chart coinId={coinId} isDark={isDark} />} />
                     <Route path="price" element={<Price />} />
                 </Routes>
                 </>

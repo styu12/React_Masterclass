@@ -67,7 +67,11 @@ interface CoinInterface {
     type: string;
 }
 
-function Coins() {
+interface ICoinsProps {
+    toggleDark: () => void;
+}
+
+function Coins({ toggleDark }: ICoinsProps) {
     const {isLoading, data} = useQuery<CoinInterface[]>("allCoins", fetchCoins, {
         refetchInterval: 10000,
     });
@@ -76,7 +80,9 @@ function Coins() {
             <Helmet>
                 <title>HCoins</title>
             </Helmet>
-            <Title>COIN TRACKER</Title>
+            <Title>COIN TRACKER
+                <button onClick={toggleDark}>Toggle Dark</button>
+            </Title>
             <CoinsList>
                 {isLoading ? <Loader>Loading...</Loader> : (
                     data?.slice(0,100).map((coin) => (
