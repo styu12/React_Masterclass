@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
 import styled from "styled-components";
 import { fetchCoins } from "../api";
+import { isDarkAtom } from "../atoms";
 
 const Container = styled.div`
     max-width: 480px;
@@ -68,10 +70,11 @@ interface CoinInterface {
 }
 
 interface ICoinsProps {
-    toggleDark: () => void;
 }
 
-function Coins({ toggleDark }: ICoinsProps) {
+function Coins({}: ICoinsProps) {
+    const setDark = useSetRecoilState(isDarkAtom);
+    const toggleDark = () => setDark(prev => !prev);
     const {isLoading, data} = useQuery<CoinInterface[]>("allCoins", fetchCoins, {
         refetchInterval: 10000,
     });
